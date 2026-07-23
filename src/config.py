@@ -19,15 +19,35 @@ load_dotenv(dotenv_path=_ENV_PATH)
 
 
 def get_pgurl() -> str:
-    """Return the Postgres connection URL from the PGURL env var.
+    """Return the Postgres connection URL.
+
+    Resolution order:
+        1. st.secrets["PGURL"]  (Streamlit / Streamlit Cloud)
+        2. os.environ["PGURL"]  (environment variable)
+        3. PGURL from .env      (loaded via python-dotenv at import time)
 
     Raises:
-        RuntimeError: if PGURL is not set.
+        RuntimeError: if PGURL is not found in any of the three sources.
     """
+    # 1. Streamlit secrets. Wrapped so scripts/tests without streamlit installed
+    #    (or with no secrets file) still work.
+    try:
+        import streamlit as st
+
+        if "PGURL" in st.secrets:
+            pgurl = st.secrets["PGURL"]
+            if pgurl:
+                return pgurl
+    except Exception:
+        pass
+
+    # 2. Environment variable, and 3. .env (loaded into os.environ at import).
     pgurl = os.environ.get("PGURL")
     if not pgurl:
         raise RuntimeError(
-            "PGURL is not set. Add it to your .env file, e.g.\n"
-            "  PGURL=postgresql://user:pass@host/db?sslmode=require"
+            "PGURL is not set. Provide it via one of:\n"
+            "  1. .streamlit/secrets.toml  ->  PGURL = \"postgresql://...\"\n"
+            "  2. environment variable     ->  export PGURL=postgresql://...\n"
+            "  3. .env file                ->  PGURL=postgresql://user:pass@host/db"
         )
     return pgurl
