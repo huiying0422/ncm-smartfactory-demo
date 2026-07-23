@@ -1,0 +1,19 @@
+# Environment / secrets
+.env
+.streamlit/secrets.toml
+
+# Virtualenv
+.venv/
+
+# Python
+__pycache__/
+*.pyc
+
+# Generated demo data
+ncm_demo_data/
+data/ncm_demo_data/
+batch_features.csv
+*.csv
+
+# OS
+.DS_Store

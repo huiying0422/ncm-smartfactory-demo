@@ -1,0 +1,8 @@
+psycopg2-binary
+pandas
+numpy
+scikit-learn
+streamlit
+plotly
+python-dotenv
+pytest
